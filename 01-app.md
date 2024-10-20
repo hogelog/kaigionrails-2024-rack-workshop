@@ -45,7 +45,6 @@ Usage: rackup [ruby options] [rack options] [rackup config]
 
    run App.new
    ```
-
 2. `call` メソッドは、Rackアプリケーションの環境情報とHTTPリクエストの情報が格納されたHash `env` を受け取り、ステータスコード、ヘッダー、ボディの配列を返します。
 
 ### ポイント
@@ -53,6 +52,7 @@ Usage: rackup [ruby options] [rack options] [rackup config]
 - `call` メソッドは必ず `[status, headers, body]` の形式でレスポンスを返す必要があります。
 - `body` は文字列を含む配列を返します。
 - .ru という拡張子は rackup config ファイルの拡張子で、`run` などのRack独自のメソッドが定義されたRubyのDSLで記述されます。
+    - 例として app.ru という名前を指定しましたが、拡張子以外の部分の名前は任意です。rackupコマンドはデフォルトだと config.ru という設定ファイルを探すので、config.ru という名前にすると rackup コマンドを実行するだけでアプリケーションが起動します。
 
 ### 実行方法
 

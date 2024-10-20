@@ -5,204 +5,143 @@
 ---
 
 ## 1. Rackミドルウェアとは
-
 Rackミドルウェアは、Rackアプリケーションのリクエストとレスポンスの間に介在し、リクエストを加工したり、レスポンスに処理を加えたりするコンポーネントです。ミドルウェアをチェーンのようにつなげることで、複雑な処理をシンプルに組み立てることができます。
 
 ---
 
 ## 2. シンプルなミドルウェアの作成
-
 まずは、簡単なミドルウェアを作成してみましょう。レスポンスヘッダーにカスタムヘッダーを追加するミドルウェアを実装します。
 
 ### 手順
+1. 新しいファイル `middleware.ru` を作成します。
+2. 適当なRackアプリケーションと、Rackミドルウェアを定義します。
+   ```ruby
+   class App
+     def call(env)
+       [200, {}, ["hello"]]
+     end
+   end
 
-1. 新しいファイル `01-plain.ru` を作成します。
+   class Middleware
+     def initialize(app, name)
+       @app = app
+       @name = name
+     end
+   
+     def call(env)
+       status, headers, body = @app.call(env)
+       headers["hello"] = @name
+       [status, headers, body]
+     end
+   end
 
-2. 基本的なRackアプリケーションを定義します。
-
-```ruby
-class App
-  def call(env)
-    # ステータスコード、ヘッダー、ボディを返す
-  end
-end
-```
-
-3. `App` クラスの `call` メソッドでは、ステータスコード200、ヘッダーは空のハッシュ、ボディは `'hello'` を含む配列を返すように実装します。
-
-4. 次に、ミドルウェアクラス `Middleware` を定義します。
-
-```ruby
-class Middleware
-  def initialize(app, kaigion)
-    # 初期化処理
-  end
-
-  def call(env)
-    # ミドルウェアの処理
-  end
-end
-```
-
-5. `initialize` メソッドでは、アプリケーションを受け取り、インスタンス変数 `@app` に保存します。また、カスタムヘッダーの値 `kaigion` も受け取って `@kaigion` に保存します。
-
-6. `call` メソッドでは、`@app.call(env)` を呼び出して、元のアプリケーションのレスポンスを取得します。その後、ヘッダーに `kaigi-on` というキーで `@kaigion` の値を追加します。
-
-7. ミドルウェアを使用するために、`use Middleware, "rails"` を記述します。
-
-8. 最後に、`run App.new` でアプリケーションを実行します。
+   use Middleware, "rails"
+   run App.new
+   ```
 
 ### ポイント
 
 - ミドルウェアは、`initialize` と `call` メソッドを持つクラスで定義します。
-- `initialize` メソッドで、次のアプリケーションやミドルウェアを受け取ります。
-- `call` メソッドで、リクエストを処理し、レスポンスを加工します。
+- ミドルウェアは `initialize` メソッドで、次のアプリケーションや任意の引数を受け取ります。
+- `call` メソッドで、リクエストを受け取って次のアプリケーションに渡し、レスポンスを返します。
+    - ここで、リクエストやレスポンスに加工を加えることができます。
 - `use` キーワードを使ってミドルウェアを登録します。
 
 ### 実行方法
 
 ターミナルで以下のコマンドを実行します。
 
-```bash
-rackup 01-plain.ru
+```console
+$ rackup middleware.ru
 ```
 
-ブラウザで `http://localhost:9292` にアクセスし、開発者ツールのネットワークタブでレスポンスヘッダーを確認すると、`kaigi-on` ヘッダーが追加されていることがわかります。
+ブラウザやcurlで `http://localhost:9292` にアクセスし `hello` ヘッダーが追加されていることがわかります。
+
+```console
+$ curl -v http://localhost:9292
+...
+< HTTP/1.1 200 OK
+< Hello: rails
+< Content-Length: 5
+< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
+< Date: Sun, 20 Oct 2024 16:17:46 GMT
+< Connection: Keep-Alive
+< 
+* Connection #0 to host localhost left intact
+hello
+```
 
 ---
 
 ## 3. Rackの標準ミドルウェアを活用する
-
-Rackが提供する標準のミドルウェアを使って、機能を拡張してみましょう。ここでは、リクエストの処理時間を測定する `Rack::Runtime` と、Basic認証を行う `Rack::Auth::Basic` を使用します。
+Rackが提供する標準のミドルウェアを使って機能を拡張してみましょう。ここではリクエストの処理時間を測定する `Rack::Runtime` と、Basic認証を行う `Rack::Auth::Basic` を使用します。
 
 ### 手順
 
-1. 新しいファイル `02-library.ru` を作成します。
-
-2. 必要なライブラリを読み込みます。
-
-```ruby
-require 'rack/response'
-require 'rack/runtime'
-require 'rack/auth/basic'
-```
-
-3. 前のステップで作成した `App` クラスと `Middleware` クラスを定義します。
-
-4. `App` クラスの `call` メソッドでは、`Rack::Response` を使ってレスポンスを返します。
-
-```ruby
-class App
-  def call(env)
-    # Rack::Responseを使用してレスポンスを生成
-  end
-end
-```
-
-5. ミドルウェアを追加します。
-
-```ruby
-use Middleware, "rails"
-use Rack::Runtime
-use Rack::Auth::Basic do |username, password|
-  # 認証の条件
-end
-```
-
-6. `Rack::Auth::Basic` のブロック内で、ユーザー名とパスワードのチェックを行います。例えば、ユーザー名が `"rubyist"`、パスワードが `"onrack"` の場合に認証を通過させます。
-
-7. 最後に、`run App.new` でアプリケーションを実行します。
+1. 必要なライブラリを読み込みます。
+   ```ruby
+   require "rack/runtime"
+   require "rack/auth/basic"
+   ```
+2. ミドルウェアを追加します。
+   ```ruby
+   use Rack::Runtime
+   use Rack::Auth::Basic do |username, password|
+     username == "rubyist" && password == "onrack"
+   end
+   ```
 
 ### ポイント
-
-- `Rack::Runtime` はリクエストの処理時間を計測し、レスポンスヘッダーに `X-Runtime` を追加します。
-- `Rack::Auth::Basic` はBasic認証を実装するミドルウェアです。ブロック内で認証ロジックを定義します。
 - ミドルウェアは上から順に適用されます。
 
 ### 実行方法
 
-```bash
-rackup 02-library.ru
+これまでと同様にrackupコマンドで起動し、ブラウザやcurlでアクセスしてみましょう。
+
+```console
+$ curl -v http://localhost:9292/
+...
+< HTTP/1.1 401 Unauthorized
+...
 ```
 
-ブラウザで `http://localhost:9292` にアクセスすると、認証ダイアログが表示されます。ユーザー名に `"rubyist"`、パスワードに `"onrack"` を入力すると、`hello!` が表示されます。レスポンスヘッダーに `X-Runtime`（処理時間）と `kaigi-on` ヘッダーが追加されていることを確認しましょう。
+認証情報なしでは401 Unauthorizedが返されます。
+
+```console
+$ curl -v http://rubyist:onrack@localhost:9292/
+...
+< HTTP/1.1 200 OK
+< X-Runtime: 0.000057
+< Hello: rails
+< Content-Length: 6
+< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
+< Date: Sun, 20 Oct 2024 16:24:30 GMT
+< Connection: Keep-Alive
+< 
+* Connection #0 to host localhost left intact
+hello!
+```
+
+認証情報を付与すると、`hello!` が表示されます。また、レスポンスヘッダーに `X-Runtime` ヘッダーが追加されていることがわかります。
+
 
 ---
 
-## 4. Sinatraとミドルウェアの組み合わせ
+## 4. まとめ
 
-最後に、Sinatraアプリケーションにミドルウェアを適用してみます。これにより、Sinatraの機能とRackミドルウェアの組み合わせ方を理解します。
+この章では、Rackミドルウェアの基本的な実装方法から、Rackの標準ミドルウェアの活用を学びました。
+ミドルウェアを使うことで、共通の処理をアプリケーションから分離し、再利用性や保守性を向上させることができます。
 
-### 手順
+ここではごくシンプルなRackアプリケーションに対し簡単なRackミドルウェア、Rack標準ミドルウェアのみ適用しました。しかしもちろんRackミドルウェアは非常に複雑なRailsアプリケーションなどに対しても同様に適用可能ですし、Rack標準以外にも様々なライブラリがRackミドルウェアの形で世の中に公開されています。
 
-1. 新しいファイル `03-sinatra.ru` を作成します。
 
-2. 必要なライブラリを読み込みます。
-
-```ruby
-require 'sinatra/base'
-require 'rack/runtime'
-require 'rack/auth/basic'
-```
-
-3. Sinatraのベースクラスを継承した `App` クラスを定義します。
-
-```ruby
-class App < Sinatra::Base
-  get '/' do
-    # レスポンスを返す
-  end
-
-  get '/hello/:id' do
-    # レスポンスを返す
-  end
-end
-```
-
-4. ルート `/` では `"It works!"`、ルート `/hello/:id` では `"Hello #{params[:id]}"` を返すように実装します。
-
-5. ミドルウェアを追加します。
-
-```ruby
-use Rack::Runtime
-use Rack::Auth::Basic do |username, password|
-  # 認証の条件
-end
-```
-
-6. 認証の条件は前と同じく、ユーザー名が `"rubyist"`、パスワードが `"onrack"` の場合に通過させます。
-
-7. 最後に、`run App.new` でアプリケーションを実行します。
-
-### ポイント
-
-- Sinatraアプリケーションでも、`use` キーワードを使ってRackミドルウェアを適用できます。
-- ミドルウェアはSinatraのルートが処理される前に適用されます。
-- `params` ハッシュを使って、ルートパラメータを取得できます。
-
-### 実行方法
-
-```bash
-rackup 03-sinatra.ru
-```
-
-ブラウザで `http://localhost:9292/` や `http://localhost:9292/hello/123` にアクセスし、認証を通過してからレスポンスが返されることを確認します。レスポンスヘッダーには `X-Runtime` が含まれています。
-
----
-
-## 5. まとめ
-
-この章では、Rackミドルウェアの基本的な実装方法から、Rackの標準ミドルウェアの活用、そしてSinatraアプリケーションへのミドルウェア適用までを学びました。ミドルウェアを使うことで、共通の処理をアプリケーションから分離し、再利用性や保守性を向上させることができます。
-
-これまでの内容を通じて、以下のポイントを理解できたと思います。
 
 - **ミドルウェアの基本構造**: `initialize` と `call` メソッドを持つクラス。
-- **ミドルウェアの適用順序**: `use` キーワードで上から順に適用される。
 - **Rackの標準ミドルウェア**: `Rack::Runtime` や `Rack::Auth::Basic` などの活用方法。
-- **Sinatraとの組み合わせ**: Sinatraアプリケーションにミドルウェアを適用する方法。
+- **Rackアプリケーションとミドルウェアによる広がり**: Rackアプリケーションとミドルウェアによる機能の拡張やライブラリの広がり。
 
-これらの知識を基に、より複雑なミドルウェアやアプリケーションを作成してみてください。
+ここまでの理解により、Railsアプリケーションの開発でも触れるRackへの親しみがましたのではないでしょうか。
 
 ---
 
-次の章では、ミドルウェアを使った高度な機能の実装や、エラーハンドリング、ロギングなどについて学んでいきます。
+次の章では、Rackアプリケーションを起動するためのRackサーバについて学んでいきます。
