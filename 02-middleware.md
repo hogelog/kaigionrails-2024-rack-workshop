@@ -55,21 +55,18 @@ Rackミドルウェアは、Rackアプリケーションのリクエストとレ
 $ rackup middleware.ru
 ```
 
-ブラウザやcurlで `http://localhost:9292` にアクセスし `hello` ヘッダーが追加されていることがわかります。
+ブラウザやcurlで `http://localhost:9292` にアクセスしてヘッダを確認してみてください。
 
 ```console
-$ curl -v http://localhost:9292
-...
-< HTTP/1.1 200 OK
-< Hello: rails
-< Content-Length: 5
-< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
-< Date: Sun, 20 Oct 2024 16:17:46 GMT
-< Connection: Keep-Alive
-< 
-* Connection #0 to host localhost left intact
+$ curl -i http://localhost:9292/
+HTTP/1.1 200 OK
+hello: rails
+Content-Length: 5
+
 hello
 ```
+
+`hello` ヘッダーが追加されていることがわかります。
 
 ---
 
@@ -99,49 +96,45 @@ Rackが提供する標準のミドルウェアを使って機能を拡張して�
 これまでと同様にrackupコマンドで起動し、ブラウザやcurlでアクセスしてみましょう。
 
 ```console
-$ curl -v http://localhost:9292/
-...
-< HTTP/1.1 401 Unauthorized
-...
+$ curl -i http://localhost:9292/
+HTTP/1.1 401 Unauthorized
+content-type: text/plain
+www-authenticate: Basic realm=""
+x-runtime: 0.000038
+hello: rails
+Content-Length: 0
 ```
 
-認証情報なしでは401 Unauthorizedが返されます。
+`Rack::Auth::Basic` により、認証情報なしでは401 Unauthorizedが返されます。
+また `Rack::Runtime` により、レスポンスヘッダーに `x-runtime` ヘッダーが追加されていることがわかります。
 
 ```console
-$ curl -v http://rubyist:onrack@localhost:9292/
-...
-< HTTP/1.1 200 OK
-< X-Runtime: 0.000057
-< Hello: rails
-< Content-Length: 6
-< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
-< Date: Sun, 20 Oct 2024 16:24:30 GMT
-< Connection: Keep-Alive
-< 
-* Connection #0 to host localhost left intact
-hello!
+$ curl -i http://rubyist:onrack@localhost:9292/
+HTTP/1.1 200 OK
+x-runtime: 0.000055
+hello: rails
+Content-Length: 6
+
+hello
 ```
 
-認証情報を付与すると、`hello!` が表示されます。また、レスポンスヘッダーに `X-Runtime` ヘッダーが追加されていることがわかります。
-
+認証情報を付与すると、`hello` が表示されます。
 
 ---
 
 ## 4. まとめ
 
 この章では、Rackミドルウェアの基本的な実装方法から、Rackの標準ミドルウェアの活用を学びました。
-ミドルウェアを使うことで、共通の処理をアプリケーションから分離し、再利用性や保守性を向上させることができます。
 
-ここではごくシンプルなRackアプリケーションに対し簡単なRackミドルウェア、Rack標準ミドルウェアのみ適用しました。しかしもちろんRackミドルウェアは非常に複雑なRailsアプリケーションなどに対しても同様に適用可能ですし、Rack標準以外にも様々なライブラリがRackミドルウェアの形で世の中に公開されています。
+ここではごくシンプルなRackミドルウェアを実装し、Rack標準ミドルウェアを利用してみました。
+世の中にはRack標準以外にも様々なライブラリがRackミドルウェアの形で世の中に公開されており、それらを組み合わせることで、多様な機能をアプリケーションに組み込むことができます。
 
-
+これまでの内容を通じて、以下のポイントを理解できたと思います。
 
 - **ミドルウェアの基本構造**: `initialize` と `call` メソッドを持つクラス。
 - **Rackの標準ミドルウェア**: `Rack::Runtime` や `Rack::Auth::Basic` などの活用方法。
 - **Rackアプリケーションとミドルウェアによる広がり**: Rackアプリケーションとミドルウェアによる機能の拡張やライブラリの広がり。
 
-ここまでの理解により、Railsアプリケーションの開発でも触れるRackへの親しみがましたのではないでしょうか。
-
 ---
 
-次の章では、Rackアプリケーションを起動するためのRackサーバについて学んでいきます。
+次の章では、Rackアプリケーションを起動するためのRackサーバを自分で実装してみましょう。

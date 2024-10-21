@@ -50,7 +50,7 @@ Usage: rackup [ruby options] [rack options] [rackup config]
 ### ポイント
 
 - `call` メソッドは必ず `[status, headers, body]` の形式でレスポンスを返す必要があります。
-- `body` は文字列を含む配列を返します。
+- `body` は通常、文字列を含む配列を返します。
 - .ru という拡張子は rackup config ファイルの拡張子で、`run` などのRack独自のメソッドが定義されたRubyのDSLで記述されます。
     - 例として app.ru という名前を指定しましたが、拡張子以外の部分の名前は任意です。rackupコマンドはデフォルトだと config.ru という設定ファイルを探すので、config.ru という名前にすると rackup コマンドを実行するだけでアプリケーションが起動します。
 
@@ -147,16 +147,11 @@ irb(#<App:0x0000000101952048>):001> env
 これまでと同様rackupコマンドで起動し、ブラウザの開発者ツールやcurlコマンドでレスポンスヘッダーを確認してみましょう。
 
 ```console
-$ curl -v http://localhost:9292/
-...
-< HTTP/1.1 200 OK
-< Content-Type: text/plain
-< Content-Length: 5
-< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
-< Date: Sun, 20 Oct 2024 12:00:00 GMT
-< Connection: Keep-Alive
-<
-* Connection #0 to host localhost left intact
+$ curl -i http://localhost:9292/
+HTTP/1.1 200 OK
+content-type: text/plain
+Content-Length: 5
+
 hello
 ```
 
@@ -241,6 +236,7 @@ Hello hogelog!
     - `Rack::Request.new` は `call(env)` で渡される env を引数として受け取ります。
 - `Rack::Response` はレスポンスの組み立てを簡単にします。
     - `Rack::Response.new` は body, status, headers を引数として受け取ります。
+    - `Rack::Response#finish` メソッドで `[status, headers, body]` 形式のレスポンスを返します
 
 ### 実行方法
 
@@ -251,16 +247,11 @@ $ curl http://localhost:9292/
 It works!
 $ curl http://localhost:9292/hello/hogelog
 Hello hogelog!
-$ curl -v http://localhost:9292/foobar
-...
-< HTTP/1.1 404 Not Found
-< Content-Type: text/plain
-< Content-Length: 9
-< Server: WEBrick/1.8.1 (Ruby/3.3.4/2024-07-09)
-< Date: Sun, 20 Oct 2024 15:24:17 GMT
-< Connection: Keep-Alive
-<
-* Connection #0 to host localhost left intact
+$ curl -i http://localhost:9292/foobar
+HTTP/1.1 404 Not Found
+content-type: text/plain
+Content-Length: 9
+
 Not Found
 ```
 
@@ -398,7 +389,7 @@ gem install rails
 rackupコマンドでアプリケーションを起動します。
 
 ```console
-$ rackup 07-rails.ru
+$ rackup app.ru
 [2024-10-21 00:57:36] INFO  WEBrick 1.8.1
 [2024-10-21 00:57:36] INFO  ruby 3.3.4 (2024-07-09) [arm64-darwin23]
 [2024-10-21 00:57:36] INFO  WEBrick::HTTPServer#start: pid=74850 port=9292
@@ -419,7 +410,7 @@ Hello hogelog!
 
 ## 9. まとめ
 
-この章では、Rackアプリケーションの基本的な構造から始めて、環境変数の確認、レスポンスヘッダーの設定、ルーティングの実装、Rackライブラリの活用、SinatraやRailsを使った実装までを学びました。これらの基礎を押さえることで、さまざまなフレームワークやライブラリを使ったWebアプリケーションの構築に役立てることができます。
+この章では、Rackアプリケーションの基本的な構造から始めて、環境変数の確認、レスポンスヘッダーの設定、ルーティングの実装、Rackライブラリの活用、SinatraやRailsを使った実装までを学びました。これらの基礎を押さえることで、さまざまなフレームワークやライブラリを使ったアプリケーションの構築に役立てることができます。
 
 これまでの内容を通じて、以下のポイントを理解できたと思います。
 
