@@ -234,7 +234,7 @@ Hello hogelog!
 
 - `Rack::Request` はリクエストに対する便利なメソッドを提供します。
     - `Rack::Request.new` は `call(env)` で渡される env を引数として受け取ります。
-- `Rack::Response` はレスポンスの組み立てを簡単にします。
+- `Rack::Response` はレスポンスの組み立てをわかりやすくします。
     - `Rack::Response.new` は body, status, headers を引数として受け取ります。
     - `Rack::Response#finish` メソッドで `[status, headers, body]` 形式のレスポンスを返します
 
@@ -265,7 +265,7 @@ Not Found
 
 ### 手順
 
-1. Sinatraのベースクラスを継承した `App` クラスを以下のように定義します。
+1. `sinatra.ru` というファイルを作成し、Sinatraのベースクラスを継承した `App` クラスを以下のように定義します。
    ```ruby
    require "sinatra/base"
 
@@ -290,7 +290,16 @@ Not Found
 
 ### 実行方法
 
-`gem install sinatra` を実行しsinatra gemをインストールした上で、これまでのようにrackupコマンドでアプリケーションを起動し、ブラウザやcurlコマンドで動作を確認してみましょう。
+sinatra gemをインストールした上で、これまでのようにrackupコマンドでアプリケーションを起動しましょう。
+
+```console
+$ gem install sinatra
+...
+$ rackup sinatra.ru
+...
+```
+
+起動したアプリケーションに対しブラウザやcurlコマンドで動作を確認してみましょう。
 
 ```console
 $ curl http://localhost:9292/
@@ -310,11 +319,12 @@ Sinatraを使うことでRackアプリケーションを非常に簡潔に記述
 ここではフルセットのRailsアプリケーションではなく、1ファイルのシンプルな形でRailsアプリケーション定義をしてrackupコマンドで起動してみます。
 
 ### 手順
-1. 最小限のRails機能をロードするために、`action_controller/railtie` をロードします。
+1. `rails.ru` というファイルを作成し、ここにRailsアプリケーションを定義していきます。
+2. 最小限のRails機能をロードするために、`action_controller/railtie` をロードします。
    ```ruby
    require "action_controller/railtie"
    ```
-2. 最低限のRailsアプリケーション、コントローラ定義します。
+3. 最低限のRailsアプリケーション、コントローラ定義します。
    ```ruby
    require "action_controller/railtie"
 
@@ -341,13 +351,13 @@ Sinatraを使うことでRackアプリケーションを非常に簡潔に記述
 
    run Rails.application
    ```
-3. 最後に、`run Rails.application` でアプリケーションを起動します。
+4. 最後に、`run Rails.application` でアプリケーションを起動します。
    ```ruby
    run Rails.application
    ```
 
 <details>
-<summary>コード全体</summary>
+<summary>rails.ru 全体</summary>
 
 ```ruby
 require "action_controller/railtie"
@@ -380,16 +390,12 @@ run Rails.application
 
 ### 実行方法
 
-Railsを使用するために、必要なgemをインストールしておきます。
+rails gemをインストールし、rackupコマンドでアプリケーションを起動します。
 
 ```console
-gem install rails
-```
-
-rackupコマンドでアプリケーションを起動します。
-
-```console
-$ rackup app.ru
+$ gem install rails
+...
+$ rackup rails.ru
 [2024-10-21 00:57:36] INFO  WEBrick 1.8.1
 [2024-10-21 00:57:36] INFO  ruby 3.3.4 (2024-07-09) [arm64-darwin23]
 [2024-10-21 00:57:36] INFO  WEBrick::HTTPServer#start: pid=74850 port=9292
