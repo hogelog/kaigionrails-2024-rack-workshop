@@ -4,6 +4,14 @@
 
 ---
 
+## コンテンツ
+- [README.md](README.md): このファイルです。Rackの概要とこのワークショップの概要について説明します。
+- [01-app.md](01-app.md): Rackアプリケーションを作成し、基本的な仕組みを理解します。
+- [02-middleware.md](02-middleware.md): Rackミドルウェアを作成しRackアプリケーションのカスタマイズについて学んでいきます。
+- [03-server.md](03-server.md): Rackサーバを自作します。
+
+Day 1で02-middleware.mdのRackミドルウェア作成まで完了し、Day 2にRackサーバの自作に取り組む予定です。
+
 ## 準備: Rackとは何か
 
 ### Rackの概要
