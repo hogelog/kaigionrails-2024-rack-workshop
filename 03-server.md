@@ -26,7 +26,7 @@
       - <https://github.com/rack/rack/blob/v3.1.8/lib/rack/rewindable_input.rb>
    - 必要に応じてここで指定した以外のライブラリを追加しても問題ありません。
 2. **アプリケーションクラスの定義**
-   新しいファイル `server.ru` を作成し、ごく単純なRackアプリケーションを定義します。
+   ごく単純なRackアプリケーションを定義します。
    ```ruby
    class App
      def call(env)
