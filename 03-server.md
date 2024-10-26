@@ -218,7 +218,7 @@ class SimpleServer
       loop do
         header_field = client.gets.chomp
         match = %r[^(?<name>[^:]+):\s+(?<value>.+)$].match(header_field)
-        break if match
+        break unless match
 
         headers[match[:name]] = match[:value]
       end
