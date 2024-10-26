@@ -99,7 +99,7 @@
       # ...
       path = # ...
 
-      headers = {}
+      request_headers = {}
       loop do
         header_field = client.gets.chomp
         # ヘッダーの解析
@@ -214,13 +214,13 @@ class SimpleServer
         next
       end
 
-      headers = {}
+      request_headers = {}
       loop do
         header_field = client.gets.chomp
         match = %r[^(?<name>[^:]+):\s+(?<value>.+)$].match(header_field)
         break unless match
 
-        headers[match[:name]] = match[:value]
+        request_headers[match[:name]] = match[:value]
       end
 
       env = {
