@@ -72,7 +72,7 @@
    ```ruby
    def start
      @logger.info "SimpleServer starting..."
-     server = TCPServer.new(options[:Port].to_i)
+     server = TCPServer.new(@options[:Port].to_i)
      loop do
        client = server.accept
 
