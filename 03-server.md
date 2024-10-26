@@ -86,16 +86,18 @@
       ```ruby
       client = server.accept
 
-      request_line = client.gets&.chomp
       # リクエストラインの解析
+      request_line = client.gets&.chomp
       # ...
+      path = # ...
       ```
      - クライアントの切断時に `nil` が返ることを考慮して、`&.` 演算子を使っています。
    - リクエストヘッダーを読み込みます。
       ```ruby
-      request_line = client.gets.chomp
       # リクエストラインの解析
+      request_line = client.gets&.chomp
       # ...
+      path = # ...
 
       headers = {}
       loop do
