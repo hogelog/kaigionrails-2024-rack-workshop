@@ -10,7 +10,7 @@ RubyGemsを使ってRackをインストールします。
 ここではRackアプリケーションのためのコア機能を提供するrack gemと、Rackアプリケーションを起動するrackupコマンドを提供するrackup gemをインストールします。
 
 ```console
-$ gem install rack rackup
+$ gem install rack rackup webrick
 ```
 
 gemをインストールしたらrackupコマンドが実行できることを確認します。
