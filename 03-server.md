@@ -15,15 +15,11 @@
    ```ruby
    require "socket"
    require "logger"
-
-   require "rack/rewindable_input"
    ```
    - `socket` はソケット通信を扱う標準ライブラリです。
        - <https://docs.ruby-lang.org/ja/latest/library/socket.html>
    - `logger` はログを記録するための標準ライブラリです。
       - <https://docs.ruby-lang.org/ja/latest/library/logger.html>
-   - `rack/rewindable_input` はリクエストボディを巻き戻し可能なIOオブジェクトに変換するライブラリです。
-      - <https://github.com/rack/rack/blob/v3.1.8/lib/rack/rewindable_input.rb>
    - 必要に応じてここで指定した以外のライブラリを追加しても問題ありません。
 2. **アプリケーションクラスの定義**
    ごく単純なRackアプリケーションを定義します。
@@ -125,7 +121,7 @@
      Rack::SERVER_NAME       => @options[:Host],
      Rack::SERVER_PORT       => @options[:Port].to_s,
      Rack::SERVER_PROTOCOL   => "HTTP/1.1",
-     Rack::RACK_INPUT        => Rack::RewindableInput.new(client),
+     Rack::RACK_INPUT        => client,
      Rack::RACK_ERRORS       => $stderr,
      Rack::QUERY_STRING      => "",
      Rack::RACK_URL_SCHEME   => "http",
@@ -174,8 +170,6 @@
 ```ruby
 require "socket"
 require "logger"
-
-require "rack/rewindable_input"
 
 class App
   def call(env)
@@ -230,7 +224,7 @@ class SimpleServer
         Rack::SERVER_NAME       => @options[:Host],
         Rack::SERVER_PORT       => @options[:Port].to_s,
         Rack::SERVER_PROTOCOL   => "HTTP/1.1",
-        Rack::RACK_INPUT        => Rack::RewindableInput.new(client),
+        Rack::RACK_INPUT        => client,
         Rack::RACK_ERRORS       => $stderr,
         Rack::QUERY_STRING      => "",
         Rack::RACK_URL_SCHEME   => "http",
@@ -350,8 +344,6 @@ SimpleServerのメインループはクライアントの接続を待ち、Rack�
 require "socket"
 require "logger"
 
-require "rack/rewindable_input"
-
 class App
   def call(env)
     if env["PATH_INFO"] == "/"
@@ -401,7 +393,7 @@ class ForkServer
           Rack::SCRIPT_NAME       => "",
           Rack::PATH_INFO         => path,
           Rack::SERVER_NAME       => @options[:Host],
-          Rack::RACK_INPUT        => Rack::RewindableInput.new(client),
+          Rack::RACK_INPUT        => client,
           Rack::RACK_ERRORS       => $stderr,
           Rack::QUERY_STRING      => "",
           Rack::REQUEST_PATH      => path,
